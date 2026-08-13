@@ -57,6 +57,18 @@
 - **Best for**: Go development
 - **Homepage**: https://github.com/golang/tools/tree/master/gopls
 
+## C#
+
+### csharp-ls
+- **Module**: `lsp_client.clients.csharp_ls.CsharpLsClient`
+- **Container**: `ghcr.io/lsp-client/csharp-ls:latest`
+- **Local**: `csharp-ls`
+- **Requires**: .NET SDK 10 or later
+- **Best for**: Roslyn-based C# navigation, diagnostics, symbol search, and refactoring
+- **Homepage**: https://github.com/razzmatazz/csharp-language-server
+
+The client searches ancestor directories for project markers in this order: `*.sln`, `*.slnx`, then `*.csproj`. Install the local server with `dotnet tool install --global csharp-ls`.
+
 ## Java
 ### JDTLS (Eclipse JDT Language Server)
 - **Module**: `lsp_client.clients.jdtls.JdtlsClient`
@@ -73,4 +85,5 @@
 | TypeScript/Node | TypeScript LS | Industry standard |
 | Deno projects | Deno | Integrated tooling |
 | Go | Gopls | Official Go team |
+| C# | csharp-ls | Roslyn-based LSP with solution and project support |
 | Java | JDTLS | Most complete Java support |

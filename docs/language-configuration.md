@@ -14,6 +14,8 @@ In the `lsp-client` SDK, language-specific configurations are primarily defined 
   A list of "marker" files used to identify the project root directory (e.g., `["pyproject.toml", "Cargo.toml", "package.json"]`). When the client attempts to determine the root directory for a file, it searches upwards recursively for directories containing these files.
 - **exclude_files (`list[str]`)**:
   A list of marker files indicating that a directory should _not_ be considered a project root. For example, `["venv", ".venv"]` can be used to prevent the client from treating a virtual environment as a project root.
+- **prioritize_project_files (`bool`, default `False`)**:
+  Whether marker order takes priority over distance from the input path. This is useful for C#, where a solution file such as `*.sln` or `*.slnx` should be selected before a nearer `*.csproj` file.
 
 ## Project Root Discovery
 
@@ -23,7 +25,8 @@ The `LanguageConfig` class provides a `find_project_root(path: Path)` method:
 1. If the path is a file, it first checks if the file suffix matches. If not, it returns `None`.
 2. It then searches upwards for `exclude_files`. If found, it stops and returns `None`.
 3. It searches upwards for `project_files`. If found, it returns the containing directory.
-4. If no markers are found, it returns the original directory (or the file's parent).
+4. If `prioritize_project_files` is enabled, it completes the ancestor search for each marker before trying the next marker.
+5. If no markers are found, it returns `None`.
 
 ## Client Language Attributes
 

@@ -15,7 +15,7 @@ Semantic code analysis via LSP. Navigate code (definitions, references, implemen
 - Building custom LSP-powered tools
 
 **Contains**:
-- 4 ready-to-use Python scripts for common LSP operations
+- Instructions for the globally installed `lsp-client` CLI
 - Complete capability reference
 - Language server selection guide
 - Custom client creation template
@@ -43,10 +43,7 @@ unzip lsp-client.zip
 ```
 lsp-client/
 ├── SKILL.md                    # Main skill documentation
-├── scripts/                    # Executable Python scripts
-│   ├── basic_analysis.py
-│   ├── find_all_symbols.py
-│   ├── safe_rename.py
+├── scripts/                    # Custom client templates
 │   └── custom_client_template.py
 └── references/                 # Reference documentation
     ├── capabilities.md

@@ -1,15 +1,37 @@
 ---
 name: lsp-client
-description: Semantic code analysis via LSP. Navigate code (definitions, references, implementations), search symbols, preview refactorings, and get file outlines. Use for exploring unfamiliar codebases or performing safe refactoring.
+description: Semantic code analysis via LSP for C#, Python, TypeScript/JavaScript, Go, Rust, Java, and Deno projects. Navigate definitions, references, and implementations; inspect hover information and symbols; search workspaces; and perform language-aware refactoring. Use when exploring unfamiliar codebases or safely renaming code.
 ---
 
 # LSP Client
 
 Semantic code analysis using Language Server Protocol (LSP) clients. Provides language-aware code navigation, symbol search, and safe refactoring capabilities.
 
+## Installation
+
+The Skill requires the `lsp-client` CLI on `PATH`. Install the published package with:
+
+```bash
+uv tool install lsp-client
+```
+
+For a local checkout or fork, use an editable tool installation so source changes become available immediately:
+
+```bash
+uv tool install --editable /path/to/lsp-client
+```
+
+Confirm the installation:
+
+```bash
+lsp-client --version
+```
+
+Language servers are separate runtime dependencies. See `references/language_servers.md` for the server required by each language.
+
 ## Quick Start
 
-Three ways to use the library:
+Three ways to use the library and CLI:
 
 ### 1. Use Pre-built Language Clients
 
@@ -60,22 +82,25 @@ class MyClient(
     ...
 ```
 
-### 3. Use Ready-Made Scripts
+### 3. Use the CLI
 
-Run standalone analysis scripts without writing code:
+Run semantic operations without writing Python code:
 
 ```bash
-# Analyze symbol at position
-python scripts/basic_analysis.py src/main.py 10 5
+# Analyze symbol at a zero-based position
+lsp-client analyze src/main.py 10 5
 
-# Find all symbols in file
-python scripts/find_all_symbols.py file src/main.py
+# Find all symbols in one file
+lsp-client symbols document src/main.py
 
-# Search workspace symbols
-python scripts/find_all_symbols.py workspace MyClass
+# Search workspace symbols; pass a source path in mixed-language repositories
+lsp-client symbols workspace MyClass src/Program.cs
 
-# Safe rename with preview
-python scripts/safe_rename.py src/main.py 10 5 new_name
+# Preview a rename without changing files
+lsp-client rename src/main.py 10 5 new_name
+
+# Apply the displayed rename edits
+lsp-client rename src/main.py 10 5 new_name --apply
 ```
 
 ## Common Workflows
@@ -89,7 +114,7 @@ python scripts/safe_rename.py src/main.py 10 5 new_name
 2. Find all references: `client.request_references()`
 3. Get type info: `client.request_hover()`
 
-**Script**: `python scripts/basic_analysis.py <file> <line> <char>`
+**Command**: `lsp-client analyze <file> <line> <character>`
 
 ### Safe Refactoring
 
@@ -100,7 +125,7 @@ python scripts/safe_rename.py src/main.py 10 5 new_name
 2. Review affected files
 3. Apply: `client.apply_workspace_edit()`
 
-**Script**: `python scripts/safe_rename.py <file> <line> <char> <new_name>`
+**Command**: `lsp-client rename <file> <line> <character> <new_name>`
 
 ### Symbol Search
 
@@ -110,9 +135,9 @@ python scripts/safe_rename.py src/main.py 10 5 new_name
 1. Workspace-wide: `client.request_workspace_symbol_list(query="MyClass")`
 2. File-specific: `client.request_document_symbol_list(file_path=...)`
 
-**Script**: 
-- `python scripts/find_all_symbols.py workspace <query>`
-- `python scripts/find_all_symbols.py file <path>`
+**Commands**:
+- `lsp-client symbols workspace <query> [source_or_project_path]`
+- `lsp-client symbols document <file>`
 
 ## Available Clients
 
@@ -123,9 +148,10 @@ Quick reference:
 - **Rust**: `RustAnalyzerClient`
 - **TypeScript/JS**: `TypescriptClient`, `DenoClient`
 - **Go**: `GoplsClient`
+- **C#**: `CsharpLsClient`
 - **Java**: `JdtlsClient`
 
-All clients support both local (subprocess) and container (Docker) modes.
+All clients support both local (subprocess) and container (Docker) modes. The CLI automatically selects a client from the source suffix, project markers, and required capabilities, including `.sln`, `.slnx`, and `.csproj` for C#. For workspace symbol searches in mixed-language repositories, pass a source file or project path from the intended language workspace.
 
 ## Capability System
 
@@ -291,6 +317,12 @@ from lsp_client.clients.pyright import PyrightContainerServer
 client = PyrightClient(server=PyrightContainerServer())
 ```
 
+Install the CLI with `uv tool install lsp-client`. For C#, also install .NET SDK 10 or later and run:
+
+```bash
+dotnet tool install --global csharp-ls
+```
+
 ### Path Translation Issues
 
 When using containers, always work with workspace-relative paths:
@@ -305,10 +337,13 @@ await client.request_hover(file_path="/Users/me/project/src/main.py", ...)
 
 ## Resources
 
+### CLI
+- `lsp-client analyze` - Hover, definition, and references for a symbol
+- `lsp-client symbols document` - Document symbol listing
+- `lsp-client symbols workspace` - Workspace symbol search
+- `lsp-client rename` - Preview rename refactoring; apply only with `--apply`
+
 ### Scripts
-- `basic_analysis.py` - Hover, definition, references for a symbol
-- `find_all_symbols.py` - Document/workspace symbol search
-- `safe_rename.py` - Preview and apply rename refactoring
 - `custom_client_template.py` - Template for creating custom clients
 
 ### References

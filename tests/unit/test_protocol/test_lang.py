@@ -153,6 +153,78 @@ def test_find_project_root_with_exclude_files(tmp_path: Path):
     assert result is None
 
 
+def test_prioritized_project_files_prefer_pattern_over_distance(tmp_path: Path):
+    config = LanguageConfig(
+        kind=lsp_type.LanguageKind.CSharp,
+        suffixes=[".cs"],
+        project_files=["*.sln", "*.csproj"],
+        prioritize_project_files=True,
+    )
+    (tmp_path / "Workspace.sln").touch()
+    project = tmp_path / "src" / "App"
+    project.mkdir(parents=True)
+    (project / "App.csproj").touch()
+    source = project / "Program.cs"
+    source.touch()
+
+    assert config.find_project_root(source) == tmp_path
+
+
+def test_prioritized_project_file_groups_prefer_nearest_within_group(
+    tmp_path: Path,
+):
+    config = LanguageConfig(
+        kind=lsp_type.LanguageKind.CSharp,
+        suffixes=[".cs"],
+        project_files=["*.sln", "*.slnx", "*.csproj"],
+        prioritized_project_file_groups=[["*.sln", "*.slnx"], ["*.csproj"]],
+    )
+    (tmp_path / "Outer.sln").touch()
+    project = tmp_path / "src" / "App"
+    project.mkdir(parents=True)
+    (project / "App.slnx").touch()
+    (project / "App.csproj").touch()
+    source = project / "Program.cs"
+    source.touch()
+
+    assert config.find_project_root(source) == project
+
+
+def test_prioritized_project_file_groups_prefer_solution_over_project(
+    tmp_path: Path,
+):
+    config = LanguageConfig(
+        kind=lsp_type.LanguageKind.CSharp,
+        suffixes=[".cs"],
+        project_files=["*.sln", "*.slnx", "*.csproj"],
+        prioritized_project_file_groups=[["*.sln", "*.slnx"], ["*.csproj"]],
+    )
+    (tmp_path / "Workspace.slnx").touch()
+    project = tmp_path / "src" / "App"
+    project.mkdir(parents=True)
+    (project / "App.csproj").touch()
+    source = project / "Program.cs"
+    source.touch()
+
+    assert config.find_project_root(source) == tmp_path
+
+
+def test_default_project_file_discovery_still_prefers_distance(tmp_path: Path):
+    config = LanguageConfig(
+        kind=lsp_type.LanguageKind.CSharp,
+        suffixes=[".cs"],
+        project_files=["*.sln", "*.csproj"],
+    )
+    (tmp_path / "Workspace.sln").touch()
+    project = tmp_path / "src" / "App"
+    project.mkdir(parents=True)
+    (project / "App.csproj").touch()
+    source = project / "Program.cs"
+    source.touch()
+
+    assert config.find_project_root(source) == project
+
+
 def test_find_project_root_with_glob_exclude_pattern(tmp_path: Path):
     config = LanguageConfig(
         kind=lsp_type.LanguageKind.Python,

@@ -23,9 +23,46 @@ A production-ready, async-first Python client for the Language Server Protocol (
 
 ### Installation
 
+Install the Python library in an application project:
+
 ```bash
 uv add lsp-client
 ```
+
+Install the standalone CLI in an isolated global environment:
+
+```bash
+uv tool install lsp-client
+```
+
+When developing from a checkout, install it in editable mode instead:
+
+```bash
+uv tool install --editable /path/to/lsp-client
+```
+
+### Command-Line Interface
+
+The `lsp-client` command automatically selects a registered client from the source file and project markers:
+
+```bash
+# Hover, definition, and references at a zero-based position
+lsp-client analyze src/Program.cs 10 5
+
+# List symbols in one file
+lsp-client symbols document src/Program.cs
+
+# Search workspace symbols; the path disambiguates mixed-language repositories
+lsp-client symbols workspace MyClass src/Program.cs
+
+# Preview a workspace rename without changing files
+lsp-client rename src/Program.cs 10 5 NewName
+
+# Apply the displayed rename edits
+lsp-client rename src/Program.cs 10 5 NewName --apply
+```
+
+The CLI environment is managed by `uv tool` and does not depend on the Python interpreter or virtual environment of the target project.
 
 ### Local Language Server
 
@@ -53,6 +90,7 @@ anyio.run(main)
 The `examples/` directory contains comprehensive usage examples:
 
 - `rust_analyzer.py` - Rust code intelligence with Rust-Analyzer
+- `csharp_ls.py` - C# code intelligence with csharp-ls
 - `pyrefly.py` - Python linting and analysis with Pyrefly
 - `protocol.py` - Direct LSP protocol usage
 
@@ -100,6 +138,9 @@ class MyPythonClient(
 | Deno                       | `lsp_client.clients.deno`          | TypeScript/JavaScript |
 | TypeScript Language Server | `lsp_client.clients.typescript`    | TypeScript/JavaScript |
 | Gopls                      | `lsp_client.clients.gopls`         | Go                    |
+| csharp-ls                  | `lsp_client.clients.csharp_ls`     | C#                    |
+
+`CsharpLsClient` requires .NET SDK 10 or later. Install its local server with `dotnet tool install --global csharp-ls`. Installing the `lsp-client` CLI does not install language servers; each selected language server remains an external runtime dependency.
 
 ### Key Benefits
 

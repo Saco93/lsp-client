@@ -38,6 +38,7 @@ from loguru import logger
 from .client.abc import Client
 from .clients import (
     BasedpyrightClient,
+    CsharpLsClient,
     DenoClient,
     GoplsClient,
     PyreflyClient,
@@ -72,6 +73,7 @@ __all__ = [
     "BasedpyrightClient",
     "Client",
     "ContainerServer",
+    "CsharpLsClient",
     "DenoClient",
     "GoplsClient",
     "LocalServer",

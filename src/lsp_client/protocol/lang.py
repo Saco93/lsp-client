@@ -27,8 +27,14 @@ class LanguageConfig:
     project_files: list[str]
     """Files that indicate the root of a project for this language."""
 
+    prioritized_project_file_groups: list[list[str]] = Factory(list)
+    """Marker groups checked by priority; distance wins within each group."""
+
     exclude_files: list[str] = Factory(list)
     """Files that indicate a directory should not be considered a project root for this language."""
+
+    prioritize_project_files: bool = False
+    """Whether marker order takes priority over distance from the input path."""
 
     def is_project_root(self, path: Path) -> bool:
         """Check if the given path is a project root for this language.
@@ -52,9 +58,12 @@ class LanguageConfig:
     def find_project_root(self, path: Path) -> Path | None:
         """Determine the project root for the given path.
 
-        The project root is the nearest ancestor directory (including the
-        directory of ``path``) that is a project root according to
-        :meth:`is_project_root`.
+        By default, the project root is the nearest ancestor directory
+        (including the directory of ``path``) that is a project root according
+        to :meth:`is_project_root`. If :attr:`prioritize_project_files` is true,
+        marker patterns are checked in their configured order before distance
+        is considered. If :attr:`prioritized_project_file_groups` is configured,
+        group order takes priority while the nearest marker wins within a group.
 
         Parameters
         ----------
@@ -74,8 +83,36 @@ class LanguageConfig:
                 return None
             path = path.parent
 
-        for p in [path, *path.parents]:
-            if self.is_project_root(p):
-                return p
+        candidates = [path, *path.parents]
+        if self.prioritized_project_file_groups:
+            for project_file_group in self.prioritized_project_file_groups:
+                for candidate in candidates:
+                    if any(
+                        next(candidate.glob(pattern), None) is not None
+                        for pattern in self.exclude_files
+                    ):
+                        continue
+                    if any(
+                        next(candidate.glob(project_file), None) is not None
+                        for project_file in project_file_group
+                    ):
+                        return candidate
+            return None
+
+        if self.prioritize_project_files:
+            for project_file in self.project_files:
+                for candidate in candidates:
+                    if any(
+                        next(candidate.glob(pattern), None) is not None
+                        for pattern in self.exclude_files
+                    ):
+                        continue
+                    if next(candidate.glob(project_file), None) is not None:
+                        return candidate
+            return None
+
+        for candidate in candidates:
+            if self.is_project_root(candidate):
+                return candidate
 
         return None

@@ -36,6 +36,20 @@ class PythonClientBase(Client, ABC):
         )
 
 
+class CSharpClientBase(Client, ABC):
+    """Base class for C# language server clients."""
+
+    @override
+    @classmethod
+    def get_language_config(cls) -> LanguageConfig:
+        return LanguageConfig(
+            kind=lsp_type.LanguageKind.CSharp,
+            suffixes=[".cs"],
+            project_files=["*.sln", "*.slnx", "*.csproj"],
+            prioritized_project_file_groups=[["*.sln", "*.slnx"], ["*.csproj"]],
+        )
+
+
 class RustClientBase(Client, ABC):
     """
     Base class for Rust language server clients.

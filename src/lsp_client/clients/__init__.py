@@ -3,6 +3,7 @@ from __future__ import annotations
 from typing import Final
 
 from .basedpyright import BasedpyrightClient
+from .csharp_ls import CsharpLsClient
 from .deno import DenoClient
 from .gopls import GoplsClient
 from .jdtls import JdtlsClient
@@ -14,6 +15,7 @@ from .typescript import TypescriptClient
 
 clients: Final = {
     "basedpyright": BasedpyrightClient,
+    "csharp_ls": CsharpLsClient,
     "gopls": GoplsClient,
     "pyrefly": PyreflyClient,
     "pyright": PyrightClient,
@@ -26,6 +28,7 @@ clients: Final = {
 
 __all__ = [
     "BasedpyrightClient",
+    "CsharpLsClient",
     "DenoClient",
     "GoplsClient",
     "JdtlsClient",
