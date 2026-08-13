@@ -12,10 +12,12 @@ In the `lsp-client` SDK, language-specific configurations are primarily defined 
   A list of file extensions associated with the language (e.g., `[".py", ".pyi"]`). The client uses these suffixes to determine if a file belongs to this language.
 - **project_files (`list[str]`)**:
   A list of "marker" files used to identify the project root directory (e.g., `["pyproject.toml", "Cargo.toml", "package.json"]`). When the client attempts to determine the root directory for a file, it searches upwards recursively for directories containing these files.
-- **exclude_files (`list[str]`)**:
+- **prioritized_project_file_groups (`list[list[str]]`, default `[]`)**:
+  Groups project markers by priority. The client searches all ancestors for the first group before considering the next group, while distance still determines which marker wins within a group. For example, C# uses `[["*.sln", "*.slnx"], ["*.csproj"]]`, so the nearest solution takes priority over any project file.
+- **exclude_files (`list[str]`, default `[]`)**:
   A list of marker files indicating that a directory should _not_ be considered a project root. For example, `["venv", ".venv"]` can be used to prevent the client from treating a virtual environment as a project root.
 - **prioritize_project_files (`bool`, default `False`)**:
-  Whether marker order takes priority over distance from the input path. This is useful for C#, where a solution file such as `*.sln` or `*.slnx` should be selected before a nearer `*.csproj` file.
+  Whether individual marker order takes priority over distance from the input path. When enabled with `project_files=["marker-a", "marker-b"]`, the client searches all ancestors for `marker-a` before considering `marker-b`. Use `prioritized_project_file_groups` when multiple markers should have equal priority.
 
 ## Project Root Discovery
 
@@ -24,9 +26,10 @@ The client determines the project root by searching upwards from the given file 
 The `LanguageConfig` class provides a `find_project_root(path: Path)` method:
 1. If the path is a file, it first checks if the file suffix matches. If not, it returns `None`.
 2. It then searches upwards for `exclude_files`. If found, it stops and returns `None`.
-3. It searches upwards for `project_files`. If found, it returns the containing directory.
-4. If `prioritize_project_files` is enabled, it completes the ancestor search for each marker before trying the next marker.
-5. If no markers are found, it returns `None`.
+3. If `prioritized_project_file_groups` is configured, it searches each group in order and returns the nearest ancestor containing a marker from the first matching group.
+4. Otherwise, if `prioritize_project_files` is enabled, it completes the ancestor search for each marker before trying the next marker.
+5. Otherwise, it returns the nearest ancestor containing any marker from `project_files`.
+6. If no markers are found, it returns `None`.
 
 ## Client Language Attributes
 

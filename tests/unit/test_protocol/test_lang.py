@@ -153,7 +153,9 @@ def test_find_project_root_with_exclude_files(tmp_path: Path):
     assert result is None
 
 
-def test_prioritized_project_files_prefer_pattern_over_distance(tmp_path: Path):
+def test_prioritized_project_files_prefer_pattern_over_distance(
+    tmp_path: Path,
+) -> None:
     config = LanguageConfig(
         kind=lsp_type.LanguageKind.CSharp,
         suffixes=[".cs"],
@@ -172,7 +174,7 @@ def test_prioritized_project_files_prefer_pattern_over_distance(tmp_path: Path):
 
 def test_prioritized_project_file_groups_prefer_nearest_within_group(
     tmp_path: Path,
-):
+) -> None:
     config = LanguageConfig(
         kind=lsp_type.LanguageKind.CSharp,
         suffixes=[".cs"],
@@ -192,7 +194,7 @@ def test_prioritized_project_file_groups_prefer_nearest_within_group(
 
 def test_prioritized_project_file_groups_prefer_solution_over_project(
     tmp_path: Path,
-):
+) -> None:
     config = LanguageConfig(
         kind=lsp_type.LanguageKind.CSharp,
         suffixes=[".cs"],
@@ -209,7 +211,9 @@ def test_prioritized_project_file_groups_prefer_solution_over_project(
     assert config.find_project_root(source) == tmp_path
 
 
-def test_default_project_file_discovery_still_prefers_distance(tmp_path: Path):
+def test_default_project_file_discovery_still_prefers_distance(
+    tmp_path: Path,
+) -> None:
     config = LanguageConfig(
         kind=lsp_type.LanguageKind.CSharp,
         suffixes=[".cs"],
